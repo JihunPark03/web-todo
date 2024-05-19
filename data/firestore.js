@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { timeStamp } from "console";
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, getDocs , getDoc, doc, setDoc, Timestamp, deleteDoc, updateDoc} from "firebase/firestore";
+import { getFirestore, collection, getDocs , getDoc, doc, setDoc, Timestamp, deleteDoc, updateDoc, orderBy, query} from "firebase/firestore";
 
 const firebaseConfig = {
     apiKey: process.env.API_KEY,
@@ -18,7 +18,10 @@ const db = getFirestore(app);
 
 //모든 할일 가져오기
 export async function fetchTodos(){
-    const querySnapshot = await getDocs(collection(db, "todos")); //"todos"<--collection name
+    const todosRef = collection(db, "todos"); //"todos"<--collection name
+    const descQuery = query (todosRef, orderBy("created_at", "desc"));
+
+    const querySnapshot = await getDocs(descQuery); 
     if (querySnapshot.empty){
         return [];
     }

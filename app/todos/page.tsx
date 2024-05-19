@@ -3,7 +3,7 @@ import TodosTable from "@/components/todos-table";
 
 async function fetchTodosApiCall(){
 	console.log("fetchTodoApi called");
-	const resposne = await fetch(`${process.env.BASE_URL}/api/todos`)
+	const resposne = await fetch(`${process.env.BASE_URL}/api/todos`,{cache: 'no-store'})
 	return resposne.json();
 }
 
