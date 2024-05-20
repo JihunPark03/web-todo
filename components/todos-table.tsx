@@ -11,6 +11,7 @@ import {FocusedTodoType, CustomModalType, Todo} from "@/types"
 import {useRouter} from "next/navigation"
 import {VerticalDotsIcon} from "./icons"
 import { PressEvent } from "@react-types/shared";
+import CustomModal from "./custom-modal";
 
 const TodosTable = ({todos}:{todos: Todo[]}) => {
 
@@ -34,8 +35,11 @@ const TodosTable = ({todos}:{todos: Todo[]}) => {
   const addATodoHandler = async (title: string) => {
     if(!todoAddEnable){return}
     {/*addtodogandler 성공했을 때 */}
+
+    setTodoAddEnable(false);
     setIsLoading(true);
 
+    await new Promise (f => setTimeout(f,600));
     await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/todos`,{
       method:'post',
       body:JSON.stringify({
@@ -46,13 +50,55 @@ const TodosTable = ({todos}:{todos: Todo[]}) => {
     setNewTodoInput(''); 
     router.refresh();
     setIsLoading(false);
-    notify();
+    notifyaddSuccessEvent();
     console.log(`할일 추가완료 : ${newtodoInput}`);
   };
 
+
+  const editATodoHandler = async (
+    id: string, 
+    editedTitle: string, 
+    editedIsDone: boolean
+  ) => {
+
+    setIsLoading(true);
+
+    await new Promise (f => setTimeout(f,600));
+    await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/todos/${id}`,{
+      method:'post',
+      body:JSON.stringify({
+        title: editedTitle,
+        is_done: editedIsDone
+      }), 
+      cache:'no-store'
+    });
+    router.refresh();
+    setIsLoading(false);
+    notifyeditSuccessEvent();
+    console.log(`할일 수정완료 : ${newtodoInput}`);
+  };
+
+
+  const deleteATodoHandler = async (
+    id: string, 
+  ) => {
+
+    setIsLoading(true);
+
+    await new Promise (f => setTimeout(f,600));
+    await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/todos/${id}`,{
+      method:'delete',
+      cache:'no-store'
+    });
+    router.refresh();
+    setIsLoading(false);
+    notifydeleteSuccessEvent();
+    console.log(`할일 삭제완료 : ${newtodoInput}`);
+  };
+
+
   const TodoRow = (aTodo: Todo) => {
     return <TableRow key={aTodo.id}>
-      <TableCell>{aTodo.id.slice(0,4)}</TableCell>
       <TableCell>{aTodo.title}</TableCell>
       <TableCell>{aTodo.is_done ? "완료":"미완료"}</TableCell>
       <TableCell>{`${aTodo.created_at}`}</TableCell>
@@ -70,7 +116,7 @@ const TodosTable = ({todos}:{todos: Todo[]}) => {
                 onOpen();
               }}>
                 <DropdownItem key = "detail">View</DropdownItem>
-                <DropdownItem key = "update">Edit</DropdownItem>
+                <DropdownItem key = "edit">Edit</DropdownItem>
                 <DropdownItem key = "delete">Delete</DropdownItem>
               </DropdownMenu>
             </Dropdown>
@@ -83,48 +129,32 @@ const TodosTable = ({todos}:{todos: Todo[]}) => {
 
   const ModalComponent = () => {
     return (
-    <div>
       <Modal backdrop="blur" isOpen={isOpen} onOpenChange={onOpenChange}>
         <ModalContent>
-          {(onClose: ((e: PressEvent) => void) | undefined) => (
-            <>
-              <ModalHeader className="flex flex-col gap-1">{currentModalData.modalType}</ModalHeader>
-              <ModalBody>
-                <p> 
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                  Nullam pulvinar risus non risus hendrerit venenatis.
-                  Pellentesque sit amet hendrerit risus, sed porttitor quam.
-                </p>
-                <p>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                  Nullam pulvinar risus non risus hendrerit venenatis.
-                  Pellentesque sit amet hendrerit risus, sed porttitor quam.
-                </p>
-                <p>
-                  Magna exercitation reprehenderit magna aute tempor cupidatat consequat elit
-                  dolor adipisicing. Mollit dolor eiusmod sunt ex incididunt cillum quis. 
-                  Velit duis sit officia eiusmod Lorem aliqua enim laboris do dolor eiusmod. 
-                  Et mollit incididunt nisi consectetur esse laborum eiusmod pariatur 
-                  proident Lorem eiusmod et. Culpa deserunt nostrud ad veniam.
-                </p>
-              </ModalBody>
-              <ModalFooter>
-                <Button color="danger" variant="light" onPress={onClose}>
-                  Close
-                </Button>
-                <Button color="primary" onPress={onClose}>
-                  Action
-                </Button>
-              </ModalFooter>
-            </>
+          {(onClose: () => void) => (
+            (currentModalData.focusedTodo && <CustomModal 
+            focusedTodo={currentModalData.focusedTodo}
+            modalType={currentModalData.modalType}
+            onClose={onClose}
+            onEdit={async (id, title, isDone) => {//수정 되었을 때
+                    await editATodoHandler(id, title, isDone);
+                    onClose();
+                    console.log(id,title,isDone)
+                  }}
+            onDelete={
+              async (id) => {
+                await deleteATodoHandler(id)
+                onClose();
+              }}
+            />)
           )}
         </ModalContent>
       </Modal>
-    </div>
     )
   }
-
-  const notify = () => toast("할일 추가 성공");
+  const notifydeleteSuccessEvent = () => toast("할일 삭제 성공");
+  const notifyeditSuccessEvent = () => toast("할일 수정 성공");
+  const notifyaddSuccessEvent = () => toast("할일 추가 성공");
   return (
     <>
     <div className="flex w-full flex-wrap md:flex-nowrap gap-4">
@@ -152,7 +182,6 @@ const TodosTable = ({todos}:{todos: Todo[]}) => {
     {isLoading && <Spinner color="warning"/>}
     <Table aria-label="Example static collection table">
       <TableHeader> 
-        <TableColumn>아이디</TableColumn>
         <TableColumn>할일내용</TableColumn>
         <TableColumn>완료여부</TableColumn>
         <TableColumn>생성일</TableColumn>
@@ -160,7 +189,7 @@ const TodosTable = ({todos}:{todos: Todo[]}) => {
       </TableHeader>
       <TableBody emptyContent={"보여줄 데이터가 없습니다"}>
         {todos && todos.map((aTodo: Todo) =>( // Todo가 type
-          TodoRow(aTodo)
+          TodoRow(aTodo) //row action
         ))}
 
       </TableBody>
