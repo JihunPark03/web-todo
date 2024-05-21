@@ -96,12 +96,13 @@ const TodosTable = ({todos}:{todos: Todo[]}) => {
     console.log(`할일 삭제완료 : ${newtodoInput}`);
   };
 
+  const checkIsDoneUI = (isDone: boolean) => (isDone ? "line-through text-gray-900/50 dark:text-white/40" : "")
 
   const TodoRow = (aTodo: Todo) => {
     return <TableRow key={aTodo.id}>
-      <TableCell>{aTodo.title}</TableCell>
-      <TableCell>{aTodo.is_done ? "완료":"미완료"}</TableCell>
-      <TableCell>{`${aTodo.created_at}`}</TableCell>
+      <TableCell className= {checkIsDoneUI(aTodo.is_done)}>{aTodo.title}</TableCell>
+      <TableCell className= {checkIsDoneUI(aTodo.is_done)}>{aTodo.is_done ? "완료":"미완료"}</TableCell>
+      <TableCell className= {checkIsDoneUI(aTodo.is_done)}>{`${aTodo.created_at}`}</TableCell>
       <TableCell>
       <div className="relative flex justify-end items-center gap-2">
             <Dropdown>
