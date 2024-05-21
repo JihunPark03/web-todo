@@ -2,21 +2,10 @@
 
 import {useState} from "react";
 import React from 'react';
-import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Input, Button, Spinner, Dropdown, DropdownTrigger, DropdownItem, DropdownMenu,
-  Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure,
-  Checkbox,
-  Link,
-  Switch,
-  CircularProgress,
-  Progress
-} from "@nextui-org/react";
-import {FocusedTodoType, CustomModalType, Todo} from "@/types"
-import {useRouter} from "next/navigation"
-import {VerticalDotsIcon} from "./icons"
-import { PressEvent } from "@react-types/shared";
-import { addATodos } from "@/data/firestore";
+import {Input, Button,ModalHeader, ModalBody, ModalFooter, Switch, CircularProgress} from "@nextui-org/react";
+import {CustomModalType, Todo} from "@/types"
+
 
 
 const CustomModal = ({focusedTodo, modalType, onClose, onEdit, onDelete}: {
@@ -96,11 +85,7 @@ const CustomModal = ({focusedTodo, modalType, onClose, onEdit, onDelete}: {
                     setIsLoading(true); //누르면 로딩표시
                     onEdit(focusedTodo.id, editedTodoInput, isDone )
                 }}>
-                {(isLoading)? <Progress 
-                    //size= "sm" 
-                    color="warning" 
-                    aria-label="Loading..."
-                    value={100}/>:"수정"}
+                {(isLoading)?<CircularProgress color="danger" aria-label="Loading..."/>:"수정"}
                 </Button>
                 <Button color="primary" onPress={onClose}>{/*누르면 꺼짐*/}
                 닫기
