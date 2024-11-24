@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { fetchATodo, deleteATodo, editATodo} from "@/data/firestore"
 
+//slug 가 user id가 됨
+
 //할일 가져오기
 export async function GET(request: NextRequest, {params}:{params: {slug: string}}) {
 
@@ -11,7 +13,7 @@ export async function GET(request: NextRequest, {params}:{params: {slug: string}
     }
 
     const response={
-        message: '단일 할일 가져오기',
+        message: 'Bring one todo list',
         data:fetchedTodo
 
     }
@@ -19,7 +21,7 @@ export async function GET(request: NextRequest, {params}:{params: {slug: string}
     return NextResponse.json(response,{status: 200});
 }
 
-//삭제
+//단일 할일 삭제
 export async function DELETE(request: NextRequest, {params}:{params: {slug: string}}) {
 
     const deletedTodo= await deleteATodo(params.slug);
@@ -32,16 +34,17 @@ export async function DELETE(request: NextRequest, {params}:{params: {slug: stri
     }
 
     const response={
-        message: '단일 할일 삭제 성공'
+        message: '단일 할일 삭제 성공',
+        data: deletedTodo
     }
 
     return NextResponse.json(response,{status: 200});
 }
 
-//수정
+//단일 할일 수정
 export async function POST(request: NextRequest, {params}:{params: {slug: string}}) {
 
-    const {title, is_done} = await request.json();
+    const {title, is_done} = await request.json(); //json data
 
     const editedTodo= await editATodo(params.slug, {title, is_done})
 

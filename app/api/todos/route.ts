@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fetchTodos, addATodos} from '@/data/firestore'
  
-
+// 모든 할일 가져오기
 export async function GET(request: NextRequest) {
 
     const fetchedTodos= await fetchTodos();
-    const response={
+    const response={//반환
         message: 'todos 몽땅 가져오기',
         data: fetchedTodos
     }
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
 
     const {title} = await request.json();
 
-    if (title === undefined||""){
+    if (title === undefined){
 
         const errMessage={
             message: "할일을 작성해주세요"

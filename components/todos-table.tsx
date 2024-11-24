@@ -113,7 +113,10 @@ const TodosTable = ({todos}:{todos: Todo[]}) => {
               </DropdownTrigger>
               <DropdownMenu onAction={(key)=>{
                 console.log(`aTodo.id : ${aTodo.id}/ key: ${key}`);
-                setCurrentModalData({focusedTodo:aTodo,modalType: key as CustomModalType})
+                setCurrentModalData({
+                  focusedTodo: aTodo,
+                  modalType: key as CustomModalType
+                })
                 onOpen();
               }}>
                 <DropdownItem key = "detail">View</DropdownItem>
@@ -136,7 +139,7 @@ const TodosTable = ({todos}:{todos: Todo[]}) => {
             (currentModalData.focusedTodo && <CustomModal 
             focusedTodo={currentModalData.focusedTodo}
             modalType={currentModalData.modalType}
-            onClose={onClose}
+            onClose={onClose}//창 닫기
             onEdit={async (id, title, isDone) => {//수정 되었을 때
                     await editATodoHandler(id, title, isDone);
                     onClose();
