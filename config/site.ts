@@ -17,14 +17,6 @@ export const siteConfig = {
 			href: "/docs",
 		},
 		{
-			label: "Pricing",
-			href: "/pricing",
-		}, 
-		{
-			label: "Blog",
-			href: "/blog",
-		},
-		{
 			label: "About",
 			href: "/about",
 		}
