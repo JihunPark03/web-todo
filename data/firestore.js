@@ -1,8 +1,8 @@
 // Import the functions you need from the SDKs you need
-import { timeStamp } from "console";
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps, getApp} from "firebase/app";
 import { getFirestore, collection, getDocs , getDoc, doc, setDoc, Timestamp, deleteDoc, updateDoc, orderBy, query} from "firebase/firestore";
 
+//todo-list
 const firebaseConfig = {
     apiKey: process.env.API_KEY,
     authDomain: process.env.AUTH_DOMAIN,
@@ -12,9 +12,20 @@ const firebaseConfig = {
     appId: process.env.APP_ID,
 };
 
+//calorie-tracker
+const firebase2Config = {
+    apiKey: process.env.API_KEY_2,
+    authDomain: process.env.AUTH_DOMAIN_2,
+    projectId: process.env.PROJECT_ID_2,
+    storageBucket: process.env.STORAGE_BUCKET_2,
+    messagingSenderId: process.env.MESSAGING_SENDER_ID_2,
+    appId: process.env.APP_ID_2,
+};
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+const app = !getApps().find((a) => a.name === "[DEFAULT]") ? initializeApp(firebaseConfig) : getApp();
 const db = getFirestore(app);
+const app_2 = !getApps().find((a) => a.name === "SECONDARY") ? initializeApp(firebase2Config, "SECONDARY") : getApp("SECONDARY");
+const db_2 = getFirestore(app_2);
 
 //모든 할일 가져오기
 export async function fetchTodos(){
@@ -133,4 +144,73 @@ export async function editATodo(id, {title, is_done}){ // id는 변수로 받고
     };
 }
 
-export default { fetchTodos, addATodos, fetchATodo, deleteATodo, editATodo}
+//firebase의 컬렉션의 모든 문서 가져오기 참고
+export async function fetchCalories(){
+    const caloriesRef = collection(db_2, "calories");
+    const descQuery = query(caloriesRef, orderBy("date", "desc"));
+
+    const querySnapshot = await getDocs(descQuery);
+    if (querySnapshot.empty){
+        return [];
+    }
+    const fetchedCalories = [];//빈 배열 만들기
+    querySnapshot.forEach((doc) => {
+      // doc.data() is never undefined for query doc snapshots
+        console.log(doc.id, " => ", doc.data());
+            const aCalorie = {
+                id: doc.id,
+                date: doc.data()["date"],
+                breakfast: doc.data()["breakfast"],
+                lunch: doc.data()["lunch"],
+                dinner: doc.data()["dinner"],
+                snack: doc.data()["snack"],
+                total: doc.data()["total"],
+                succeed: doc.data()["succeed"],
+            }
+        fetchedCalories.push(aCalorie);
+    });
+    return fetchedCalories;
+}
+
+export async function addACalories({calorie}){
+    const newCalorieRef = doc(collection(db_2, "calories"));
+
+    const timestamp = Timestamp.fromDate(new Date())
+    const date = timestamp.toDate();
+    const hour = timestamp.toDate().getHours()
+
+    const newCalorieData={
+        id: newCalorieRef.id,
+        date: date.toISOString().split('T')[0],
+        breakfast: 0,
+        lunch: 0,
+        dinner: 0,
+        snack: 0,
+        total: 0,
+        succeed: false
+    }
+
+    if (hour >= 6 && hour <= 10) {
+        newCalorieData.breakfast = calorie
+    }
+    else if (hour >= 10 && hour <= 13) {
+        newCalorieData.lunch = calorie
+    }
+    else if (hour >= 17 && hour <= 21) {
+        newCalorieData.dinner = calorie
+    }
+    else{
+        newCalorieData.snack = calorie
+    }
+
+    newCalorieData.total = newCalorieData.breakfast + 
+    newCalorieData.lunch + newCalorieData.dinner +
+    newCalorieData.snack;
+
+    newCalorieData.succeed = newCalorieData.total > 2500;
+
+    await setDoc(newCalorieRef, newCalorieData);
+
+    return newCalorieData;
+}
+export default { fetchTodos, addATodos, fetchATodo, deleteATodo, editATodo, fetchCalories, addACalories}
