@@ -22,6 +22,12 @@ export async function POST(request: NextRequest){
 		return NextResponse.json(errMessage, {status: 422});
 	}
 
+	if (typeof calorie != "number"){
+		const errMessage={
+			message: "숫자형태로 입력해주세요"
+		}
+		return NextResponse.json(errMessage, {status: 422});
+	}
 	const addedCalorie = await addACalories({calorie});
 
 	const response = {
