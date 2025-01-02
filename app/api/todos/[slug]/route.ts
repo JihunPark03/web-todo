@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { fetchATodo, deleteATodo, editATodo} from "@/data/firestore"
 
 //slug 가 user id가 됨
+//서버에서 요청을 받고 처리하는 로직만 포함
 
 //할일 가져오기
 export async function GET(request: NextRequest, {params}:{params: {slug: string}}) {

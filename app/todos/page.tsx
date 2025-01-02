@@ -3,12 +3,12 @@ import TodosTable from "@/components/todos-table";
 
 async function fetchTodosApiCall(){
 	console.log("fetchTodoApi called");
-	const resposne = await fetch(`${process.env.BASE_URL}/api/todos`,{cache: 'no-store'})
-	const contentTypeCheck = resposne.headers.get('Content-Type');
+	const response = await fetch(`${process.env.BASE_URL}/api/todos`,{cache: 'no-store'})
+	const contentTypeCheck = response.headers.get('Content-Type');
 	if(contentTypeCheck?.includes("text/html")){
 		return null;
 	}
-	return resposne.json();
+	return response.json();
 }
 
 export default async function Todospage() {

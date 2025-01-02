@@ -78,13 +78,14 @@ export async function fetchATodo(id){
     if (tododocSnap.exists()) {//데이터 존재시
         console.log("Document data:", tododocSnap.data());
         const fetchedTodo ={
-        id: tododocSnap.id,
-        title: tododocSnap.data()["title"],
-        is_done: tododocSnap.data()["is_done"],
-        created_at: tododocSnap.data()["created_at"].toDate(),
-    }
+            id: tododocSnap.id,
+            title: tododocSnap.data()["title"],
+            is_done: tododocSnap.data()["is_done"],
+            created_at: tododocSnap.data()["created_at"].toDate(),
+        }
       return fetchedTodo;
-    } else {
+    }
+    else {
       // docSnap.data() will be undefined in this case
         console.log("No such document!");
         return null;
