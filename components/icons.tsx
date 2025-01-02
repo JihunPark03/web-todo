@@ -1,20 +1,30 @@
 import * as React from "react";
 import { IconSvgProps } from "@/types";
 
-export const Logo: React.FC<IconSvgProps> = ({
+interface ImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
+	size?: number;
+  }
+  
+  export const Logo: React.FC<ImageProps> = ({
 	size = 36,
 	width,
 	height,
 	...props
-}) => (
-	<img
-    src="/Jihun_logo.png" // Relative to the `public` folder
-    alt="Logo"
-    width={width || size}
-    height={height || size}
-    {...props}
-  />
-);
+  }) => {
+	const calculatedWidth = width ? parseInt(width as string, 10) || size : size;
+	const calculatedHeight = height ? parseInt(height as string, 10) || size : size;
+  
+	return (
+	  <img
+		src="/Jihun_logo.png" // Relative to the `public` folder
+		alt="Logo"
+		width={calculatedWidth}
+		height={calculatedHeight}
+		{...props}
+	  />
+	);
+  };
+  
 
 export const DiscordIcon: React.FC<IconSvgProps> = ({
 	size = 24,
