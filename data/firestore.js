@@ -45,7 +45,7 @@ export async function fetchTodos(){
             id: doc.id,
             title: doc.data()["title"],
             is_done: doc.data()["is_done"],
-            created_at: doc.data()["created_at"].toDate(),
+            created_at: doc.data()["created_at"].toDate().toISOString().split('T')[0],
         }
         //.toLocaleTimeString('ko')
         fetchedTodos.push(aTodo);
@@ -145,6 +145,7 @@ export async function editATodo(id, {title, is_done}){ // id는 변수로 받고
 }
 
 //firebase의 컬렉션의 모든 문서 가져오기 참고
+//칼로리 전부 다 가져오기
 export async function fetchCalories(){
     const caloriesRef = collection(db_2, "calories");
     const descQuery = query(caloriesRef, orderBy("date", "desc"));
@@ -172,6 +173,7 @@ export async function fetchCalories(){
     return fetchedCalories;
 }
 
+//칼로리 추가
 export async function addACalories({calorie}){
     const newCalorieRef = doc(collection(db_2, "calories"));
 
@@ -213,4 +215,83 @@ export async function addACalories({calorie}){
 
     return newCalorieData;
 }
-export default { fetchTodos, addATodos, fetchATodo, deleteATodo, editATodo, fetchCalories, addACalories}
+
+//한 날짜의 칼로리 가져오기
+//데이터베이스에서 해당 아이디의 정보를 가져오는 함수
+export async function fetchACalorie(id){
+
+    if (id === null){
+        return null;
+    }
+
+    const caloriedocRef = doc(db_2, "calories", id);
+    const caloriedocSnap = await getDoc(caloriedocRef);//docs의 모음
+
+    if(caloriedocSnap.exists()){
+        const fetchedCalorie = {
+            id : caloriedocSnap.id,
+            date: caloriedocSnap.data()["date"],
+            breakfast: caloriedocSnap.data()["breakfast"],
+            lunch: caloriedocSnap.data()["lunch"],
+            dinner: caloriedocSnap.data()["dinner"],
+            snack: caloriedocSnap.data()["snack"],
+            total: caloriedocSnap.data()["total"],
+            succeed: caloriedocSnap.data()["succeed"],
+        }
+        return fetchedCalorie;
+    }
+    else{
+        console.log("No such document!");
+        return null;
+    }
+}
+
+//해당 날짜의 내용 삭제
+export async function deleteACalorie(id){
+    const fetchedCalorie = await fetchACalorie(id);
+
+    if (fetchedCalorie === null){
+        return null;
+    }
+
+    await deleteDoc(doc(db_2, "calories", id));
+    return fetchedCalorie;
+}
+
+//해당 날짜의 칼로리 수정
+//id 뒤의 {} 안에 있는 매계변수들은 json형태로 받는다
+export async function editACalorie(id, {breakfast, lunch, dinner, snack}){
+    const fetchedCalorie = await fetchACalorie(id);
+
+    if (fetchedCalorie === null){
+        return null;
+    }
+
+    const calorieRef = doc(db_2, "calories", id);
+
+    const total = breakfast + lunch + dinner + snack;
+
+    const succeed = total > 2500
+
+    await updateDoc(calorieRef, {
+        breakfast: breakfast,
+        lunch: lunch,
+        dinner: dinner,
+        snack: snack,
+        total: total,
+        succeed: succeed
+    });
+
+    return{
+        id: id,
+        date: fetchedCalorie.date,
+        breakfast: breakfast,
+        lunch: lunch,
+        dinner: dinner,
+        snack: snack,
+        total: total,
+        succeed: succeed
+    }
+}
+
+export default { fetchTodos, addATodos, fetchATodo, deleteATodo, editATodo, fetchCalories, addACalories, fetchACalorie, deleteACalorie, editACalorie}
