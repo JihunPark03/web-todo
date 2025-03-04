@@ -17,3 +17,19 @@ export type FocusedTodoType = {
     focusedTodo: Todo | null,
     modalType: CustomModalType
 }
+
+export type Calorie = {
+  id: string;
+  date: Date;
+  breakfast: string;
+  lunch: string;
+  dinner: string;
+  snack: string;
+  total: number;
+  succeed: boolean;
+}
+
+export type FocusedCalorieType = {
+  focusedCalorie: Calorie | null,
+  modalType: CustomModalType
+}

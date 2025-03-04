@@ -45,7 +45,7 @@ export async function fetchTodos(){
             id: doc.id,
             title: doc.data()["title"],
             is_done: doc.data()["is_done"],
-            created_at: doc.data()["created_at"].toDate().toISOString().split('T')[0],
+            created_at: doc.data()["created_at"].toDate().toISOString().split('.')[0],
         }
         //.toLocaleTimeString('ko')
         fetchedTodos.push(aTodo);
@@ -58,7 +58,9 @@ export async function addATodos({title}){
     // Add a new document with a generated id
     const newTodoRef = doc(collection(db, "todos")); // 새로운 todo reference 가져옴
 
-    const createAtTimestamp=Timestamp.fromDate(new Date())
+    const now = new Date();
+    const jstDate = new Date(now.getTime() + 9 * 60 * 60 * 1000); 
+    const createAtTimestamp=Timestamp.fromDate(jstDate)
 
     const newTodoData={
         id: newTodoRef.id,
@@ -158,6 +160,7 @@ export async function fetchCalories(){
     querySnapshot.forEach((doc) => {
       // doc.data() is never undefined for query doc snapshots
         console.log(doc.id, " => ", doc.data());
+        if (data["date"] && data["breakfast"] && data["lunch"] && data["dinner"] && data["snack"] && data["total"] && data["succeed"]) {
             const aCalorie = {
                 id: doc.id,
                 date: doc.data()["date"],
@@ -168,6 +171,10 @@ export async function fetchCalories(){
                 total: doc.data()["total"],
                 succeed: doc.data()["succeed"],
             }
+        }
+        else{
+            console.warn("Missing fields in document:", doc.id, data);
+        }
         fetchedCalories.push(aCalorie);
     });
     return fetchedCalories;
@@ -177,7 +184,10 @@ export async function fetchCalories(){
 export async function addACalories({calorie}){
     const newCalorieRef = doc(collection(db_2, "calories"));
 
-    const timestamp = Timestamp.fromDate(new Date())
+    const now = new Date();
+    const jstDate = new Date(now.getTime() + 9 * 60 * 60 * 1000); 
+    const timestamp=Timestamp.fromDate(jstDate)
+
     const date = timestamp.toDate();
     const hour = timestamp.toDate().getHours()
 
